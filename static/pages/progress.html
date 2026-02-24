@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitTrack – Progress</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+    <div class="app-layout">
+        <nav class="sidebar">
+            <div class="brand">💪 FitTrack</div>
+            <ul class="nav-links">
+                <li><a href="/static/pages/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a></li>
+                <li><a href="/static/pages/workouts.html"><span class="nav-icon">🏋️</span> Workouts</a></li>
+                <li><a href="/static/pages/calories.html"><span class="nav-icon">🍽️</span> Calories</a></li>
+                <li><a href="/static/pages/progress.html" class="active"><span class="nav-icon">📈</span> Progress</a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span class="user-name" id="userName">User</span>
+                </div>
+                <button class="btn btn-secondary btn-sm btn-full" onclick="logout()">Sign Out</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h1>📈 Progress Tracker</h1>
+                    <p>Monitor your body weight and composition over time</p>
+                </div>
+                <button class="btn btn-primary" onclick="openProgressModal()">+ Log Progress</button>
+            </div>
+
+            <div id="alertArea" class="alert"></div>
+
+            <!-- Summary Stats -->
+            <div class="stat-cards">
+                <div class="card stat-card blue">
+                    <div class="stat-icon">⚖️</div>
+                    <div class="stat-value" id="currentWeight">--</div>
+                    <div class="stat-label">Current Weight (kg)</div>
+                </div>
+                <div class="card stat-card green">
+                    <div class="stat-icon">📉</div>
+                    <div class="stat-value" id="weightChange">--</div>
+                    <div class="stat-label">Total Change (kg)</div>
+                </div>
+                <div class="card stat-card purple">
+                    <div class="stat-icon">💧</div>
+                    <div class="stat-value" id="bodyFat">--</div>
+                    <div class="stat-label">Body Fat %</div>
+                </div>
+                <div class="card stat-card orange">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value" id="totalEntries">0</div>
+                    <div class="stat-label">Total Entries</div>
+                </div>
+            </div>
+
+            <!-- Weight Chart -->
+            <div class="section">
+                <h2 class="mb-lg">Weight Trend</h2>
+                <div class="card">
+                    <div class="chart-container">
+                        <canvas id="weightChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Log Table -->
+            <div class="section">
+                <h2 class="mb-lg">History</h2>
+                <div class="card">
+                    <div id="progressList">
+                        <div class="empty-state">
+                            <div class="empty-icon">📈</div>
+                            <p>No progress data yet. Start logging your weight!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Log Progress Modal -->
+    <div class="modal-overlay" id="progressModal">
+        <div class="modal">
+            <h3>Log Progress</h3>
+            <form id="progressForm">
+                <div class="form-group">
+                    <label for="progressDate">Date</label>
+                    <input type="date" id="progressDate" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="progressWeight">Weight (kg)</label>
+                        <input type="number" id="progressWeight" step="0.1" placeholder="75.0" min="20" max="300">
+                    </div>
+                    <div class="form-group">
+                        <label for="progressBodyFat">Body Fat (%)</label>
+                        <input type="number" id="progressBodyFat" step="0.1" placeholder="15.0" min="1" max="60">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="progressNotes">Notes</label>
+                    <textarea id="progressNotes" rows="2"
+                        placeholder="e.g. Feeling stronger, belt is looser"></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeProgressModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/progress.js"></script>
+</body>
+
+</html>
