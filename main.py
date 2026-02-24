@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 from database import engine, Base
 from routers import auth, exercises, workouts, calories, progress
@@ -22,6 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Include routers
 app.include_router(auth.router)
 app.include_router(exercises.router)
@@ -32,7 +37,7 @@ app.include_router(progress.router)
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to FitTrack API"}
+    return RedirectResponse(url="/static/pages/index.html")
 
 
 if __name__ == "__main__":
