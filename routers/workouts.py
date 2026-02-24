@@ -67,7 +67,7 @@ def create_workout(
         workout_set = WorkoutSet(
             workout_id=workout.id,
             exercise_id=set_data.exercise_id,
-            sets=set_data.sets,
+            set_count=set_data.set_count,
             reps=set_data.reps,
             weight_kg=set_data.weight_kg,
         )

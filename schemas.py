@@ -58,7 +58,7 @@ class ExerciseResponse(BaseModel):
 
 class WorkoutSetCreate(BaseModel):
     exercise_id: int
-    sets: int = 1
+    set_count: int = 1
     reps: int = 1
     weight_kg: Optional[float] = None
 
@@ -66,7 +66,7 @@ class WorkoutSetCreate(BaseModel):
 class WorkoutSetResponse(BaseModel):
     id: int
     exercise_id: int
-    sets: int
+    set_count: int
     reps: int
     weight_kg: Optional[float] = None
 

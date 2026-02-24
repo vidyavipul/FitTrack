@@ -54,7 +54,7 @@ class WorkoutSet(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     workout_id = Column(Integer, ForeignKey("workouts.id", ondelete="CASCADE"), nullable=False)
     exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="CASCADE"), nullable=False)
-    sets = Column(Integer, nullable=False, default=1)
+    set_count = Column(Integer, nullable=False, default=1)
     reps = Column(Integer, nullable=False, default=1)
     weight_kg = Column(Numeric(6, 2))
     created_at = Column(TIMESTAMP, server_default=func.now())

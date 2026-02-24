@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS workout_sets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     workout_id INT NOT NULL,
     exercise_id INT NOT NULL,
-    sets INT NOT NULL DEFAULT 1,
+    set_count INT NOT NULL DEFAULT 1,
     reps INT NOT NULL DEFAULT 1,
     weight_kg DECIMAL(6, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
