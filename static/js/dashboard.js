@@ -30,14 +30,15 @@ async function loadDashboard() {
     try {
         // Fetch all data in parallel
         const [workouts, exercises, calSummary, progressSummary] = await Promise.all([
-            api.get(`/workouts/?start_date=${today}&end_date=${today}`),
+            api.get('/workouts/'),
             api.get('/exercises/'),
             api.get(`/calories/daily-summary?log_date=${today}`),
             api.get('/progress/summary'),
         ]);
 
-        // Workout stats
-        document.getElementById('statWorkouts').textContent = workouts ? workouts.length : 0;
+        // Workout stats (today only; the list below shows the most recent)
+        const todaysWorkouts = (workouts || []).filter(w => w.date === today);
+        document.getElementById('statWorkouts').textContent = todaysWorkouts.length;
 
         // Exercise count
         document.getElementById('statExercises').textContent = exercises ? exercises.length : 0;
