@@ -201,7 +201,9 @@ function renderProgressTable(logs) {
 }
 
 function openProgressModal() {
-    document.getElementById('progressDate').value = todayStr();
+    const dateInput = document.getElementById('progressDate');
+    capAtToday(dateInput);
+    dateInput.value = todayStr();
     document.getElementById('progressModal').classList.add('show');
     document.getElementById('progressWeight').focus();
 }

@@ -11,10 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     showUser();
 
     const dateInput = document.getElementById('filterDate');
+    capAtToday(dateInput);
     dateInput.value = currentDate;
     dateInput.addEventListener('change', (e) => {
         if (!e.target.value) return;
-        currentDate = e.target.value;
+        // Typed-in dates can get past the picker's max; clamp them to today
+        currentDate = e.target.value > todayStr() ? todayStr() : e.target.value;
+        e.target.value = currentDate;
         loadCalories();
     });
 
@@ -30,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function shiftDay(delta) {
     const d = parseDate(currentDate);
     d.setDate(d.getDate() + delta);
+    if (dateKey(d) > todayStr()) return;
     currentDate = dateKey(d);
     document.getElementById('filterDate').value = currentDate;
     loadCalories();
@@ -44,7 +48,10 @@ function renderDayHeading() {
     let title = long;
     if (diff === 0) title = 'Today';
     else if (diff === 1) title = 'Yesterday';
-    else if (diff === -1) title = 'Tomorrow';
+
+    // No stepping into days that haven't happened yet
+    capAtToday(document.getElementById('filterDate'));
+    document.getElementById('nextDay').disabled = currentDate >= todayStr();
 
     document.getElementById('dayTitle').textContent = title;
     document.getElementById('dayKicker').textContent = title === long ? 'Meals' : `Meals · ${long}`;
@@ -104,6 +111,7 @@ function renderCalorieLogs(logs) {
 }
 
 function openCalorieModal() {
+    capAtToday(document.getElementById('mealDate'));
     document.getElementById('mealDate').value = currentDate;
     document.getElementById('calorieModal').classList.add('show');
     document.getElementById('foodName').focus();

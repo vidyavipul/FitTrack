@@ -72,6 +72,7 @@ function renderWorkouts(workouts) {
 }
 
 function openWorkoutModal() {
+    capAtToday(document.getElementById('workoutDate'));
     document.getElementById('workoutModal').classList.add('show');
     // Add one default set row
     if (document.getElementById('setsContainer').children.length === 0) {

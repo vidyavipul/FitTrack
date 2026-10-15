@@ -1,8 +1,22 @@
-from datetime import date
-from typing import Optional, List, Literal
-from pydantic import BaseModel, EmailStr, Field
+from datetime import date, datetime, timedelta, timezone
+from typing import Annotated, Optional, List, Literal
+from pydantic import AfterValidator, BaseModel, EmailStr, Field
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
+
+
+def _not_in_future(value: date) -> date:
+    # The server doesn't know the client's timezone, so accept any date that is
+    # already "today" somewhere on Earth (the earliest timezone is UTC+14). The
+    # frontend enforces the stricter local-date limit.
+    latest = (datetime.now(timezone.utc) + timedelta(hours=14)).date()
+    if value > latest:
+        raise ValueError("Date can't be in the future")
+    return value
+
+
+# A date for a new or edited log entry: today or earlier
+LogDate = Annotated[date, AfterValidator(_not_in_future)]
 
 
 # ─── Auth Schemas ───────────────────────────────────────────────
@@ -80,14 +94,14 @@ class WorkoutSetResponse(BaseModel):
 # ─── Workout Schemas ────────────────────────────────────────────
 
 class WorkoutCreate(BaseModel):
-    date: date
+    date: LogDate
     duration_min: Optional[int] = Field(None, ge=1, le=1440)
     notes: Optional[str] = None
     workout_sets: List[WorkoutSetCreate] = []
 
 
 class WorkoutUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[LogDate] = None
     duration_min: Optional[int] = None
     notes: Optional[str] = None
 
@@ -107,7 +121,7 @@ class WorkoutResponse(BaseModel):
 # ─── Calorie Log Schemas ────────────────────────────────────────
 
 class CalorieLogCreate(BaseModel):
-    date: date
+    date: LogDate
     meal_type: MealType
     food_name: str = Field(min_length=1, max_length=100)
     calories: int = Field(0, ge=0, le=20000)
@@ -117,7 +131,7 @@ class CalorieLogCreate(BaseModel):
 
 
 class CalorieLogUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[LogDate] = None
     meal_type: Optional[MealType] = None
     food_name: Optional[str] = None
     calories: Optional[int] = None
@@ -144,7 +158,7 @@ class CalorieLogResponse(BaseModel):
 # ─── Progress Log Schemas ────────────────────────────────────────
 
 class ProgressLogCreate(BaseModel):
-    date: date
+    date: LogDate
     weight_kg: Optional[float] = Field(None, gt=0, lt=1000)
     body_fat_pct: Optional[float] = Field(None, ge=0, le=100)
     notes: Optional[str] = None

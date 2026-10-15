@@ -199,6 +199,15 @@ function renderPlate(container, summary) {
 }
 
 /**
+ * Stop a date input from accepting days after today (local time). Called
+ * again whenever a form opens, so a tab left open overnight still allows
+ * the new day.
+ */
+function capAtToday(input) {
+    input.max = todayStr();
+}
+
+/**
  * Parse a YYYY-MM-DD string as a local date.
  */
 function parseDate(dateStr) {

@@ -736,6 +736,12 @@ h1, h2, h3 {
 
 .step-btn:hover { border-color: var(--ink); }
 
+.step-btn:disabled {
+    color: var(--rule);
+    border-color: var(--rule-soft);
+    cursor: default;
+}
+
 /* ─── Chart plate ────────────────────────────────────────────── */
 
 .chart-plate {
