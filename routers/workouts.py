@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
-from models import Workout, WorkoutSet, User
+from models import Exercise, Workout, WorkoutSet, User
 from schemas import (
     WorkoutCreate, WorkoutUpdate, WorkoutResponse, WorkoutSetCreate, WorkoutSetResponse,
 )
@@ -54,6 +54,16 @@ def create_workout(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new workout session with optional sets."""
+    requested = {s.exercise_id for s in workout_data.workout_sets}
+    if requested:
+        found = {row.id for row in db.query(Exercise.id).filter(Exercise.id.in_(requested))}
+        missing = sorted(requested - found)
+        if missing:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Unknown exercise id: {', '.join(map(str, missing))}",
+            )
+
     workout = Workout(
         user_id=current_user.id,
         date=workout_data.date,
