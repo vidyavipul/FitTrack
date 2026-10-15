@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, timezone
 from typing import Annotated, ClassVar, Optional, List, Literal
-from pydantic import AfterValidator, BaseModel, EmailStr, Field, model_validator
+from pydantic import AfterValidator, BaseModel, EmailStr, Field, field_validator, model_validator
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 
@@ -40,6 +40,14 @@ class UserCreate(BaseModel):
     email: EmailStr
     # bcrypt only uses the first 72 bytes of a password
     password: str = Field(min_length=8, max_length=72)
+
+    @field_validator("email")
+    @classmethod
+    def _email_fits_column(cls, value: str) -> str:
+        # users.email is VARCHAR(100); EmailStr alone allows up to 254
+        if len(value) > 100:
+            raise ValueError("Email must be at most 100 characters")
+        return value
 
 
 class UserResponse(BaseModel):
@@ -179,7 +187,7 @@ class CalorieLogResponse(BaseModel):
 
 class ProgressLogCreate(BaseModel):
     date: LogDate
-    weight_kg: Optional[float] = Field(None, gt=0, lt=1000)
+    weight_kg: Optional[float] = Field(None, gt=0, le=500)  # column is DECIMAL(5,2)
     body_fat_pct: Optional[float] = Field(None, ge=0, le=100)
     notes: Optional[str] = None
 
