@@ -70,7 +70,9 @@ FitTrack/
 ├── models.py            # SQLAlchemy ORM models
 ├── schemas.py           # Pydantic request/response schemas
 ├── auth.py              # JWT auth & password utilities
+├── seed.py              # Exercise catalog + demo data seeder
 ├── requirements.txt     # Python dependencies
+├── .env.example         # Template for .env
 ├── .env                 # Environment variables (not committed)
 │
 ├── routers/
@@ -133,31 +135,36 @@ pip install -r requirements.txt
 
 ### 4. Set up the database
 
-Create the MySQL database (tables are auto-created by SQLAlchemy on startup):
+Create the MySQL database (tables are auto-created by SQLAlchemy on startup) and a dedicated app user that can only access it:
 
 ```bash
 mysql -u root -p < sql/schema.sql
+mysql -u root -p -e "CREATE USER 'fittrack'@'localhost' IDENTIFIED BY 'choose_a_strong_password';
+                     GRANT ALL PRIVILEGES ON fittrack_db.* TO 'fittrack'@'localhost';"
 ```
 
 ### 5. Configure environment variables
 
-Create a `.env` file in the project root:
-
-```env
-DATABASE_USER=root
-DATABASE_PASSWORD=your_password
-DATABASE_HOST=localhost
-DATABASE_PORT=3306
-DATABASE_NAME=fittrack_db
-
-JWT_SECRET_KEY=your_secret_key
-JWT_ALGORITHM=HS256
-JWT_EXPIRATION_MINUTES=30
+```bash
+cp .env.example .env
 ```
 
-> **Tip:** Generate a secure secret key with `python -c "import secrets; print(secrets.token_hex(16))"`
+Then fill in `DATABASE_PASSWORD` (the password chosen above) and `JWT_SECRET_KEY`. The server refuses to start without a secret key of at least 32 characters. Generate one with:
 
-### 6. Run the server
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+### 6. Seed the exercise catalog
+
+```bash
+python seed.py           # adds ~28 exercises (safe to re-run)
+python seed.py --demo    # also creates a 'demo' user with 6 weeks of sample data
+```
+
+`--demo` prints the demo user's password. Pass `--password <pw>` to choose it, or `--reset` to regenerate the demo data.
+
+### 7. Run the server
 
 ```bash
 python main.py
@@ -176,16 +183,17 @@ The app will be available at **http://localhost:8000** and the interactive API d
 | `POST` | `/register` | Create a new user account |
 | `POST` | `/login` | Authenticate & receive JWT token |
 
+Use the **Authorize** button in `/docs` to log in to Swagger with a username and password.
+
 ### Workouts
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/workouts/` | List workouts (with optional date filters) |
-| `POST` | `/workouts/` | Create a new workout session |
+| `GET` | `/workouts/{id}` | Get a workout with its sets |
+| `POST` | `/workouts/` | Create a workout session with its sets |
 | `PUT` | `/workouts/{id}` | Update a workout |
 | `DELETE` | `/workouts/{id}` | Delete a workout |
-| `POST` | `/workouts/{id}/sets` | Add a set to a workout |
-| `DELETE` | `/workouts/sets/{id}` | Remove a set |
 
 ### Exercises
 
@@ -193,12 +201,15 @@ The app will be available at **http://localhost:8000** and the interactive API d
 |--------|----------|-------------|
 | `GET` | `/exercises/` | List all exercises |
 | `POST` | `/exercises/` | Add a new exercise |
+| `PUT` | `/exercises/{id}` | Update an exercise |
+| `DELETE` | `/exercises/{id}` | Delete an exercise |
 
 ### Calories
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/calories/` | List calorie logs |
+| `GET` | `/calories/daily-summary` | Calorie & macro totals for a date |
 | `POST` | `/calories/` | Log a meal |
 | `PUT` | `/calories/{id}` | Update a log entry |
 | `DELETE` | `/calories/{id}` | Delete a log entry |
@@ -208,8 +219,8 @@ The app will be available at **http://localhost:8000** and the interactive API d
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/progress/` | List progress entries |
+| `GET` | `/progress/summary` | Latest metrics and weight change |
 | `POST` | `/progress/` | Log body metrics |
-| `PUT` | `/progress/{id}` | Update an entry |
 | `DELETE` | `/progress/{id}` | Delete an entry |
 
 > Full interactive documentation is available at `/docs` (Swagger UI) or `/redoc` when the server is running.
@@ -225,9 +236,10 @@ The app will be available at **http://localhost:8000** and the interactive API d
 | `DATABASE_HOST` | Database host | `localhost` |
 | `DATABASE_PORT` | Database port | `3306` |
 | `DATABASE_NAME` | Database name | `fittrack_db` |
-| `JWT_SECRET_KEY` | Secret key for signing tokens | — |
+| `JWT_SECRET_KEY` | Secret key for signing tokens (required, 32+ chars) | — |
 | `JWT_ALGORITHM` | JWT signing algorithm | `HS256` |
 | `JWT_EXPIRATION_MINUTES` | Token expiry in minutes | `30` |
+| `CORS_ORIGINS` | Comma-separated origins allowed to call the API | `http://localhost:8000,http://127.0.0.1:8000` |
 
 ---
 
