@@ -1,14 +1,17 @@
 from datetime import date
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from typing import Optional, List, Literal
+from pydantic import BaseModel, EmailStr, Field
+
+MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 
 
 # ─── Auth Schemas ───────────────────────────────────────────────
 
 class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
+    username: str = Field(min_length=3, max_length=50, pattern=r"^[A-Za-z0-9_.-]+$")
+    email: EmailStr
+    # bcrypt only uses the first 72 bytes of a password
+    password: str = Field(min_length=8, max_length=72)
 
 
 class UserResponse(BaseModel):
@@ -33,9 +36,9 @@ class LoginRequest(BaseModel):
 # ─── Exercise Schemas ───────────────────────────────────────────
 
 class ExerciseCreate(BaseModel):
-    name: str
-    category: str
-    muscle_group: str
+    name: str = Field(min_length=1, max_length=100)
+    category: str = Field(min_length=1, max_length=50)
+    muscle_group: str = Field(min_length=1, max_length=50)
 
 
 class ExerciseUpdate(BaseModel):
@@ -58,9 +61,9 @@ class ExerciseResponse(BaseModel):
 
 class WorkoutSetCreate(BaseModel):
     exercise_id: int
-    set_count: int = 1
-    reps: int = 1
-    weight_kg: Optional[float] = None
+    set_count: int = Field(1, ge=1, le=100)
+    reps: int = Field(1, ge=1, le=1000)
+    weight_kg: Optional[float] = Field(None, ge=0, le=1000)
 
 
 class WorkoutSetResponse(BaseModel):
@@ -78,7 +81,7 @@ class WorkoutSetResponse(BaseModel):
 
 class WorkoutCreate(BaseModel):
     date: date
-    duration_min: Optional[int] = None
+    duration_min: Optional[int] = Field(None, ge=1, le=1440)
     notes: Optional[str] = None
     workout_sets: List[WorkoutSetCreate] = []
 
@@ -105,17 +108,17 @@ class WorkoutResponse(BaseModel):
 
 class CalorieLogCreate(BaseModel):
     date: date
-    meal_type: str
-    food_name: str
-    calories: int = 0
-    protein_g: Optional[float] = 0
-    carbs_g: Optional[float] = 0
-    fat_g: Optional[float] = 0
+    meal_type: MealType
+    food_name: str = Field(min_length=1, max_length=100)
+    calories: int = Field(0, ge=0, le=20000)
+    protein_g: Optional[float] = Field(0, ge=0, le=2000)
+    carbs_g: Optional[float] = Field(0, ge=0, le=2000)
+    fat_g: Optional[float] = Field(0, ge=0, le=2000)
 
 
 class CalorieLogUpdate(BaseModel):
     date: Optional[date] = None
-    meal_type: Optional[str] = None
+    meal_type: Optional[MealType] = None
     food_name: Optional[str] = None
     calories: Optional[int] = None
     protein_g: Optional[float] = None
@@ -142,8 +145,8 @@ class CalorieLogResponse(BaseModel):
 
 class ProgressLogCreate(BaseModel):
     date: date
-    weight_kg: Optional[float] = None
-    body_fat_pct: Optional[float] = None
+    weight_kg: Optional[float] = Field(None, gt=0, lt=1000)
+    body_fat_pct: Optional[float] = Field(None, ge=0, le=100)
     notes: Optional[str] = None
 
 
