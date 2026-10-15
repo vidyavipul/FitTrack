@@ -132,8 +132,10 @@ function formatDate(dateStr) {
 }
 
 /**
- * Get today's date as YYYY-MM-DD.
+ * Get today's date as YYYY-MM-DD in the user's local timezone.
  */
 function todayStr() {
-    return new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
