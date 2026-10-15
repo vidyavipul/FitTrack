@@ -73,8 +73,8 @@ function renderCalorieLogs(logs) {
             <tbody>
                 ${logs.map(l => `
                     <tr>
-                        <td><span class="badge badge-info">${mealTypeEmoji[l.meal_type] || '🍽️'} ${l.meal_type}</span></td>
-                        <td>${l.food_name}</td>
+                        <td><span class="badge badge-info">${mealTypeEmoji[l.meal_type] || '🍽️'} ${escapeHtml(l.meal_type)}</span></td>
+                        <td>${escapeHtml(l.food_name)}</td>
                         <td><strong>${l.calories}</strong></td>
                         <td>${l.protein_g || 0}g</td>
                         <td>${l.carbs_g || 0}g</td>

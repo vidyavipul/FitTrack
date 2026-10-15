@@ -58,11 +58,11 @@ function renderWorkouts(workouts) {
                         <td>
                             ${w.sets.map(s => {
         const ex = exercises.find(e => e.id === s.exercise_id);
-        return `<span class="badge badge-info" style="margin: 2px;">${ex ? ex.name : 'Exercise #' + s.exercise_id}: ${s.set_count}×${s.reps} ${s.weight_kg ? '@ ' + s.weight_kg + 'kg' : ''}</span>`;
+        return `<span class="badge badge-info" style="margin: 2px;">${escapeHtml(ex ? ex.name : 'Exercise #' + s.exercise_id)}: ${s.set_count}×${s.reps} ${s.weight_kg ? '@ ' + s.weight_kg + 'kg' : ''}</span>`;
     }).join('')}
                             ${w.sets.length === 0 ? '<span class="text-muted">No sets</span>' : ''}
                         </td>
-                        <td class="text-muted">${w.notes || '—'}</td>
+                        <td class="text-muted">${escapeHtml(w.notes || '—')}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="deleteWorkout(${w.id})">Delete</button>
                         </td>
@@ -98,7 +98,7 @@ function addSetRow() {
             <label>Exercise</label>
             <select class="set-exercise" required>
                 <option value="">Select...</option>
-                ${exercises.map(e => `<option value="${e.id}">${e.name} (${e.muscle_group})</option>`).join('')}
+                ${exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)} (${escapeHtml(e.muscle_group)})</option>`).join('')}
             </select>
         </div>
         <div class="form-group" style="margin-bottom: 0;">

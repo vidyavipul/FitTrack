@@ -85,7 +85,7 @@ function renderRecentWorkouts(workouts) {
                         <td>${formatDate(w.date)}</td>
                         <td>${w.duration_min ? w.duration_min + ' min' : '—'}</td>
                         <td><span class="badge badge-info">${w.sets.length} sets</span></td>
-                        <td class="text-muted">${w.notes || '—'}</td>
+                        <td class="text-muted">${escapeHtml(w.notes || '—')}</td>
                     </tr>
                 `).join('')}
             </tbody>

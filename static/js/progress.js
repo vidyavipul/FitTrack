@@ -168,7 +168,7 @@ function renderProgressTable(logs) {
                         <td>${formatDate(l.date)}</td>
                         <td><strong>${l.weight_kg || '—'}</strong></td>
                         <td>${l.body_fat_pct ? l.body_fat_pct + '%' : '—'}</td>
-                        <td class="text-muted">${l.notes || '—'}</td>
+                        <td class="text-muted">${escapeHtml(l.notes || '—')}</td>
                         <td>
                             <button class="btn btn-danger btn-sm" onclick="deleteProgress(${l.id})">Delete</button>
                         </td>
