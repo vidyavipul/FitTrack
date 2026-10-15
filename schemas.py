@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta, timezone
-from typing import Annotated, Optional, List, Literal
-from pydantic import AfterValidator, BaseModel, EmailStr, Field
+from typing import Annotated, ClassVar, Optional, List, Literal
+from pydantic import AfterValidator, BaseModel, EmailStr, Field, model_validator
 
 MealType = Literal["breakfast", "lunch", "dinner", "snack"]
 
@@ -17,6 +17,20 @@ def _not_in_future(value: date) -> date:
 
 # A date for a new or edited log entry: today or earlier
 LogDate = Annotated[date, AfterValidator(_not_in_future)]
+
+
+class PartialUpdate(BaseModel):
+    """Base for update payloads: fields left out stay as they are, but fields
+    the database requires can't be cleared by sending null."""
+    required_fields: ClassVar[frozenset] = frozenset()
+
+    @model_validator(mode="after")
+    def _reject_null_required(self):
+        cleared = sorted(f for f in self.model_fields_set & self.required_fields
+                         if getattr(self, f) is None)
+        if cleared:
+            raise ValueError(f"{', '.join(cleared)} can't be empty")
+        return self
 
 
 # ─── Auth Schemas ───────────────────────────────────────────────
@@ -55,10 +69,12 @@ class ExerciseCreate(BaseModel):
     muscle_group: str = Field(min_length=1, max_length=50)
 
 
-class ExerciseUpdate(BaseModel):
-    name: Optional[str] = None
-    category: Optional[str] = None
-    muscle_group: Optional[str] = None
+class ExerciseUpdate(PartialUpdate):
+    required_fields = frozenset({"name", "category", "muscle_group"})
+
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    category: Optional[str] = Field(None, min_length=1, max_length=50)
+    muscle_group: Optional[str] = Field(None, min_length=1, max_length=50)
 
 
 class ExerciseResponse(BaseModel):
@@ -100,9 +116,11 @@ class WorkoutCreate(BaseModel):
     workout_sets: List[WorkoutSetCreate] = []
 
 
-class WorkoutUpdate(BaseModel):
+class WorkoutUpdate(PartialUpdate):
+    required_fields = frozenset({"date"})
+
     date: Optional[LogDate] = None
-    duration_min: Optional[int] = None
+    duration_min: Optional[int] = Field(None, ge=1, le=1440)
     notes: Optional[str] = None
 
 
@@ -130,14 +148,16 @@ class CalorieLogCreate(BaseModel):
     fat_g: Optional[float] = Field(0, ge=0, le=2000)
 
 
-class CalorieLogUpdate(BaseModel):
+class CalorieLogUpdate(PartialUpdate):
+    required_fields = frozenset({"date", "meal_type", "food_name", "calories"})
+
     date: Optional[LogDate] = None
     meal_type: Optional[MealType] = None
-    food_name: Optional[str] = None
-    calories: Optional[int] = None
-    protein_g: Optional[float] = None
-    carbs_g: Optional[float] = None
-    fat_g: Optional[float] = None
+    food_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    calories: Optional[int] = Field(None, ge=0, le=20000)
+    protein_g: Optional[float] = Field(None, ge=0, le=2000)
+    carbs_g: Optional[float] = Field(None, ge=0, le=2000)
+    fat_g: Optional[float] = Field(None, ge=0, le=2000)
 
 
 class CalorieLogResponse(BaseModel):
