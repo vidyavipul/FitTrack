@@ -147,7 +147,68 @@ function formatDate(dateStr) {
  * Get today's date as YYYY-MM-DD in the user's local timezone.
  */
 function todayStr() {
-    const d = new Date();
+    return dateKey(new Date());
+}
+
+/**
+ * Fill in the masthead user name and monogram.
+ */
+function showUser() {
+    const username = getUsername();
+    document.getElementById('userName').textContent = username;
+    document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+}
+
+/**
+ * Render a protein / carbs / fat breakdown into a container. Shares are by
+ * energy (4 kcal/g protein and carbs, 9 kcal/g fat), not by weight.
+ */
+function renderPlate(container, summary) {
+    const p = summary ? summary.total_protein : 0;
+    const c = summary ? summary.total_carbs : 0;
+    const f = summary ? summary.total_fat : 0;
+    const kcal = { p: p * 4, c: c * 4, f: f * 9 };
+    const total = kcal.p + kcal.c + kcal.f;
+    const share = (k) => (total ? Math.round((kcal[k] / total) * 100) : 0);
+
+    if (!total) {
+        container.innerHTML = `
+            <div class="macro-bar" aria-hidden="true"></div>
+            <p class="empty">An empty plate.<small>Log a meal to see where your energy comes from.</small></p>`;
+        return;
+    }
+
+    const rows = [
+        ['p', 'Protein', p],
+        ['c', 'Carbohydrate', c],
+        ['f', 'Fat', f],
+    ];
+    container.innerHTML = `
+        <div class="macro-bar" role="img"
+             aria-label="Protein ${share('p')}%, carbohydrate ${share('c')}%, fat ${share('f')}% of energy">
+            ${rows.map(([k]) => `<span class="${k}" style="width:${(kcal[k] / total) * 100}%"></span>`).join('')}
+        </div>
+        <ul class="macro-key">
+            ${rows.map(([k, label, grams]) => `
+                <li>
+                    <span class="swatch ${k}"></span>${label}
+                    <span class="grams">${Math.round(grams)} g</span>
+                    <span class="share">${share(k)}%</span>
+                </li>`).join('')}
+        </ul>`;
+}
+
+/**
+ * Parse a YYYY-MM-DD string as a local date.
+ */
+function parseDate(dateStr) {
+    return new Date(dateStr + 'T00:00:00');
+}
+
+/**
+ * Format a Date as YYYY-MM-DD in local time.
+ */
+function dateKey(d) {
     const pad = (n) => String(n).padStart(2, '0');
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }

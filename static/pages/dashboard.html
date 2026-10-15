@@ -1,116 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitTrack – Dashboard</title>
+    <title>Overview · FitTrack</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 
 <body>
-    <div class="app-layout">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="brand">💪 FitTrack</div>
-            <ul class="nav-links">
-                <li><a href="/static/pages/dashboard.html" class="active"><span class="nav-icon">📊</span> Dashboard</a>
-                </li>
-                <li><a href="/static/pages/workouts.html"><span class="nav-icon">🏋️</span> Workouts</a></li>
-                <li><a href="/static/pages/calories.html"><span class="nav-icon">🍽️</span> Calories</a></li>
-                <li><a href="/static/pages/progress.html"><span class="nav-icon">📈</span> Progress</a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span class="user-name" id="userName">User</span>
-                </div>
-                <button class="btn btn-secondary btn-sm btn-full" onclick="logout()">Sign Out</button>
+    <header class="masthead">
+        <div class="masthead-inner">
+            <a class="wordmark" href="/static/pages/dashboard.html">FitTrack <small>training log</small></a>
+            <nav class="tabs" aria-label="Main">
+                <a href="/static/pages/dashboard.html" class="active" aria-current="page">Overview</a>
+                <a href="/static/pages/workouts.html">Workouts</a>
+                <a href="/static/pages/calories.html">Meals</a>
+                <a href="/static/pages/progress.html">Body</a>
+            </nav>
+            <div class="who">
+                <span class="monogram" id="userAvatar" aria-hidden="true">U</span>
+                <span id="userName">User</span>
+                <button class="link-btn" onclick="logout()">Sign out</button>
             </div>
-        </nav>
+        </div>
+    </header>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="page-header">
-                <div>
-                    <h1 id="greeting">Good morning 👋</h1>
-                    <p>Here's your fitness overview for today</p>
-                </div>
-                <p class="text-muted" id="todayDate"></p>
+    <main class="page">
+        <div class="page-head">
+            <div>
+                <p class="kicker" id="todayDate"></p>
+                <h1 id="greeting">Hello</h1>
             </div>
+            <a href="/static/pages/workouts.html" class="btn btn-primary">Log a workout</a>
+        </div>
 
-            <!-- Stats -->
-            <div class="stat-cards">
-                <div class="card stat-card purple">
-                    <div class="stat-icon">🏋️</div>
-                    <div class="stat-value" id="statWorkouts">0</div>
-                    <div class="stat-label">Workouts Today</div>
-                </div>
-                <div class="card stat-card green">
-                    <div class="stat-icon">🔥</div>
-                    <div class="stat-value" id="statCalories">0</div>
-                    <div class="stat-label">Calories Today</div>
-                </div>
-                <div class="card stat-card blue">
-                    <div class="stat-icon">⚖️</div>
-                    <div class="stat-value" id="statWeight">--</div>
-                    <div class="stat-label">Current Weight (kg)</div>
-                </div>
-                <div class="card stat-card orange">
-                    <div class="stat-icon">🎯</div>
-                    <div class="stat-value" id="statExercises">0</div>
-                    <div class="stat-label">Exercises in Catalog</div>
-                </div>
+        <div class="figures">
+            <div class="figure">
+                <div class="figure-label">Sessions today</div>
+                <div class="figure-value" id="statWorkouts">0</div>
             </div>
+            <div class="figure accent">
+                <div class="figure-label">Eaten today</div>
+                <div class="figure-value"><span id="statCalories">0</span><span class="unit">kcal</span></div>
+            </div>
+            <div class="figure">
+                <div class="figure-label">Body weight</div>
+                <div class="figure-value"><span id="statWeight">--</span><span class="unit">kg</span></div>
+            </div>
+            <div class="figure">
+                <div class="figure-label">Exercises on file</div>
+                <div class="figure-value" id="statExercises">0</div>
+            </div>
+        </div>
 
-            <!-- Recent Activity -->
-            <div class="section">
-                <div class="section-header">
-                    <h2>Recent Workouts</h2>
-                    <a href="/static/pages/workouts.html" class="btn btn-secondary btn-sm">View All</a>
+        <div class="split">
+            <section class="section">
+                <div class="section-head">
+                    <h2>Recent sessions</h2>
+                    <a href="/static/pages/workouts.html">All workouts</a>
                 </div>
-                <div class="card">
-                    <div id="recentWorkouts">
-                        <div class="empty-state">
-                            <div class="empty-icon">🏋️</div>
-                            <p>No workouts yet. Start by logging your first workout!</p>
-                        </div>
-                    </div>
+                <div id="recentWorkouts">
+                    <p class="empty">Nothing logged yet.<small>Your sessions will show up here.</small></p>
                 </div>
-            </div>
+            </section>
 
-            <!-- Today's Macros -->
-            <div class="section">
-                <div class="section-header">
-                    <h2>Today's Nutrition</h2>
-                    <a href="/static/pages/calories.html" class="btn btn-secondary btn-sm">Log Meal</a>
-                </div>
-                <div class="stat-cards" style="grid-template-columns: repeat(4, 1fr);">
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-primary);"
-                            id="macroProtein">0g</div>
-                        <div class="stat-label">Protein</div>
+            <div>
+                <section class="section">
+                    <div class="section-head">
+                        <h2>This week</h2>
+                        <span class="aside" id="weekCount"></span>
                     </div>
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--warning);" id="macroCarbs">0g
-                        </div>
-                        <div class="stat-label">Carbs</div>
+                    <div class="week" id="weekStrip"></div>
+                </section>
+
+                <section class="section">
+                    <div class="section-head">
+                        <h2>Today's plate</h2>
+                        <a href="/static/pages/calories.html">Log a meal</a>
                     </div>
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--danger);" id="macroFat">0g</div>
-                        <div class="stat-label">Fat</div>
-                    </div>
-                    <div class="card" style="text-align: center;">
-                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--success);" id="macroMeals">0</div>
-                        <div class="stat-label">Meals</div>
-                    </div>
-                </div>
+                    <div class="plate" id="macroPlate"></div>
+                </section>
             </div>
-        </main>
-    </div>
+        </div>
+    </main>
 
     <script src="/static/js/api.js"></script>
     <script src="/static/js/dashboard.js"></script>
 </body>
-
 </html>

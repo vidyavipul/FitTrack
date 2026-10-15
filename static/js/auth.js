@@ -23,8 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
 async function handleLogin(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
+    const label = btn.textContent;
     btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span> Signing in...';
+    btn.innerHTML = '<span class="loader"></span> Signing in';
 
     try {
         const data = {
@@ -40,26 +41,27 @@ async function handleLogin(e) {
         showAlert('authAlert', err.message);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = 'Sign In';
+        btn.textContent = label;
     }
 }
 
 async function handleRegister(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
+    const label = btn.textContent;
     btn.disabled = true;
-    btn.innerHTML = '<span class="loader"></span> Creating account...';
+    btn.innerHTML = '<span class="loader"></span> Creating account';
 
     try {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (password !== confirmPassword) {
-            throw new Error('Passwords do not match');
+            throw new Error('The two passwords don\'t match.');
         }
 
         if (password.length < 8) {
-            throw new Error('Password must be at least 8 characters');
+            throw new Error('Use at least 8 characters for the password.');
         }
 
         const data = {
@@ -69,7 +71,7 @@ async function handleRegister(e) {
         };
 
         await api.post('/register', data);
-        showAlert('authAlert', 'Account created! Redirecting to login...', 'success');
+        showAlert('authAlert', 'Account created. Taking you to sign in.', 'success');
         setTimeout(() => {
             window.location.href = '/static/pages/index.html';
         }, 1500);
@@ -77,6 +79,6 @@ async function handleRegister(e) {
         showAlert('authAlert', err.message);
     } finally {
         btn.disabled = false;
-        btn.innerHTML = 'Create Account';
+        btn.textContent = label;
     }
 }

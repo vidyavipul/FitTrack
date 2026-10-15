@@ -1,94 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitTrack – Calories</title>
+    <title>Meals · FitTrack</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 
 <body>
-    <div class="app-layout">
-        <nav class="sidebar">
-            <div class="brand">💪 FitTrack</div>
-            <ul class="nav-links">
-                <li><a href="/static/pages/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a></li>
-                <li><a href="/static/pages/workouts.html"><span class="nav-icon">🏋️</span> Workouts</a></li>
-                <li><a href="/static/pages/calories.html" class="active"><span class="nav-icon">🍽️</span> Calories</a>
-                </li>
-                <li><a href="/static/pages/progress.html"><span class="nav-icon">📈</span> Progress</a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span class="user-name" id="userName">User</span>
-                </div>
-                <button class="btn btn-secondary btn-sm btn-full" onclick="logout()">Sign Out</button>
+    <header class="masthead">
+        <div class="masthead-inner">
+            <a class="wordmark" href="/static/pages/dashboard.html">FitTrack <small>training log</small></a>
+            <nav class="tabs" aria-label="Main">
+                <a href="/static/pages/dashboard.html">Overview</a>
+                <a href="/static/pages/workouts.html">Workouts</a>
+                <a href="/static/pages/calories.html" class="active" aria-current="page">Meals</a>
+                <a href="/static/pages/progress.html">Body</a>
+            </nav>
+            <div class="who">
+                <span class="monogram" id="userAvatar" aria-hidden="true">U</span>
+                <span id="userName">User</span>
+                <button class="link-btn" onclick="logout()">Sign out</button>
             </div>
-        </nav>
+        </div>
+    </header>
 
-        <main class="main-content">
-            <div class="page-header">
-                <div>
-                    <h1>🍽️ Calorie Tracker</h1>
-                    <p>Log your meals and track your nutrition</p>
-                </div>
-                <button class="btn btn-primary" onclick="openCalorieModal()">+ Log Meal</button>
+    <main class="page">
+        <div class="page-head">
+            <div>
+                <p class="kicker" id="dayKicker">&nbsp;</p>
+                <h1 id="dayTitle">Today</h1>
             </div>
-
-            <div id="alertArea" class="alert"></div>
-
-            <!-- Daily Summary -->
-            <div class="stat-cards" style="grid-template-columns: repeat(5, 1fr);">
-                <div class="card stat-card green">
-                    <div class="stat-icon">🔥</div>
-                    <div class="stat-value" id="totalCals">0</div>
-                    <div class="stat-label">Calories</div>
-                </div>
-                <div class="card" style="text-align: center;">
-                    <div style="font-size: 1.6rem; font-weight: 800; color: var(--accent-primary);" id="totalProtein">0g
-                    </div>
-                    <div class="stat-label">Protein</div>
-                </div>
-                <div class="card" style="text-align: center;">
-                    <div style="font-size: 1.6rem; font-weight: 800; color: var(--warning);" id="totalCarbs">0g</div>
-                    <div class="stat-label">Carbs</div>
-                </div>
-                <div class="card" style="text-align: center;">
-                    <div style="font-size: 1.6rem; font-weight: 800; color: var(--danger);" id="totalFat">0g</div>
-                    <div class="stat-label">Fat</div>
-                </div>
-                <div class="card" style="text-align: center;">
-                    <div style="font-size: 1.6rem; font-weight: 800; color: var(--info);" id="mealCount">0</div>
-                    <div class="stat-label">Meals</div>
-                </div>
+            <div class="date-nav">
+                <button class="step-btn" onclick="shiftDay(-1)" aria-label="Previous day">‹</button>
+                <input type="date" id="filterDate" class="date-field" aria-label="Date">
+                <button class="step-btn" onclick="shiftDay(1)" aria-label="Next day">›</button>
+                <button class="btn btn-primary" onclick="openCalorieModal()">Log a meal</button>
             </div>
+        </div>
 
-            <!-- Date Filter -->
-            <div class="flex-between mb-lg">
-                <h2>Meal Log</h2>
-                <div style="display: flex; gap: var(--space-sm); align-items: center;">
-                    <input type="date" id="filterDate" class="form-group"
-                        style="margin: 0; padding: 0.5rem 0.8rem; background: var(--bg-glass); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit;">
-                </div>
+        <div id="alertArea" class="alert"></div>
+
+        <div class="figures">
+            <div class="figure accent">
+                <div class="figure-label">Energy</div>
+                <div class="figure-value"><span id="totalCals">0</span><span class="unit">kcal</span></div>
             </div>
+            <div class="figure">
+                <div class="figure-label">Protein</div>
+                <div class="figure-value"><span id="totalProtein">0</span><span class="unit">g</span></div>
+            </div>
+            <div class="figure">
+                <div class="figure-label">Carbs</div>
+                <div class="figure-value"><span id="totalCarbs">0</span><span class="unit">g</span></div>
+            </div>
+            <div class="figure">
+                <div class="figure-label">Fat</div>
+                <div class="figure-value"><span id="totalFat">0</span><span class="unit">g</span></div>
+            </div>
+            <div class="figure">
+                <div class="figure-label">Meals</div>
+                <div class="figure-value" id="mealCount">0</div>
+            </div>
+        </div>
 
-            <div class="card">
+        <div class="split">
+            <section class="section">
+                <div class="section-head">
+                    <h2>What you ate</h2>
+                </div>
                 <div id="calorieList">
-                    <div class="empty-state">
-                        <div class="empty-icon">🍽️</div>
-                        <p>No meals logged for today. Click "Log Meal" to start!</p>
-                    </div>
+                    <p class="empty">Loading…</p>
                 </div>
-            </div>
-        </main>
-    </div>
+            </section>
+            <section class="section">
+                <div class="section-head">
+                    <h2>Where it came from</h2>
+                </div>
+                <div class="plate" id="macroPlate"></div>
+            </section>
+        </div>
+    </main>
 
-    <!-- Log Meal Modal -->
-    <div class="modal-overlay" id="calorieModal">
-        <div class="modal">
-            <h3>Log Meal</h3>
+    <div class="modal-overlay" id="calorieModal" onclick="if (event.target === this) closeCalorieModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="calorieModalTitle">
+            <h3 id="calorieModalTitle">Log a meal</h3>
+            <div id="formAlert" class="alert"></div>
             <form id="calorieForm">
                 <div class="form-row">
                     <div class="form-group">
@@ -96,7 +93,7 @@
                         <input type="date" id="mealDate" required>
                     </div>
                     <div class="form-group">
-                        <label for="mealType">Meal Type</label>
+                        <label for="mealType">Meal</label>
                         <select id="mealType" required>
                             <option value="breakfast">Breakfast</option>
                             <option value="lunch">Lunch</option>
@@ -105,24 +102,19 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label for="foodName">Food Name</label>
-                    <input type="text" id="foodName" placeholder="e.g. Grilled Chicken Salad" required>
+                    <label for="foodName">What was it?</label>
+                    <input type="text" id="foodName" placeholder="Dal, rice and salad" maxlength="100" required>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="mealCalories">Calories</label>
-                        <input type="number" id="mealCalories" placeholder="0" min="0" required>
-                    </div>
+                <div class="form-group">
+                    <label for="mealCalories">Calories (kcal)</label>
+                    <input type="number" id="mealCalories" placeholder="0" min="0" required>
+                </div>
+                <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
                     <div class="form-group">
                         <label for="mealProtein">Protein (g)</label>
                         <input type="number" id="mealProtein" placeholder="0" min="0" step="0.1">
                     </div>
-                </div>
-
-                <div class="form-row">
                     <div class="form-group">
                         <label for="mealCarbs">Carbs (g)</label>
                         <input type="number" id="mealCarbs" placeholder="0" min="0" step="0.1">
@@ -132,10 +124,9 @@
                         <input type="number" id="mealFat" placeholder="0" min="0" step="0.1">
                     </div>
                 </div>
-
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeCalorieModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Meal</button>
+                    <button type="submit" class="btn btn-primary">Save meal</button>
                 </div>
             </form>
         </div>
@@ -144,5 +135,4 @@
     <script src="/static/js/api.js"></script>
     <script src="/static/js/calories.js"></script>
 </body>
-
 </html>

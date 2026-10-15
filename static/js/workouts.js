@@ -5,12 +5,13 @@ let exercises = [];
 document.addEventListener('DOMContentLoaded', () => {
     if (!requireAuth()) return;
 
-    const username = getUsername();
-    document.getElementById('userName').textContent = username;
-    document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+    showUser();
 
     document.getElementById('workoutDate').value = todayStr();
     document.getElementById('workoutForm').addEventListener('submit', handleCreateWorkout);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeWorkoutModal();
+    });
 
     loadData();
 });
@@ -30,47 +31,44 @@ async function loadData() {
 
 function renderWorkouts(workouts) {
     const container = document.getElementById('workoutList');
-    if (!workouts.length) {
+    const n = workouts.length;
+    document.getElementById('sessionCount').textContent =
+        n === 1 ? '1 session logged' : `${n} sessions logged`;
+
+    if (!n) {
         container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">🏋️</div>
-                <p>No workouts logged yet. Click "New Workout" to start!</p>
-            </div>`;
+            <li class="empty">No sessions yet.<small>Use "Log a workout" to write down your first one.</small></li>`;
         return;
     }
 
-    container.innerHTML = `
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Duration</th>
-                    <th>Exercises</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${workouts.map(w => `
-                    <tr>
-                        <td>${formatDate(w.date)}</td>
-                        <td>${w.duration_min ? w.duration_min + ' min' : '—'}</td>
-                        <td>
-                            ${w.sets.map(s => {
-        const ex = exercises.find(e => e.id === s.exercise_id);
-        return `<span class="badge badge-info" style="margin: 2px;">${escapeHtml(ex ? ex.name : 'Exercise #' + s.exercise_id)}: ${s.set_count}×${s.reps} ${s.weight_kg ? '@ ' + s.weight_kg + 'kg' : ''}</span>`;
-    }).join('')}
-                            ${w.sets.length === 0 ? '<span class="text-muted">No sets</span>' : ''}
-                        </td>
-                        <td class="text-muted">${escapeHtml(w.notes || '—')}</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm" onclick="deleteWorkout(${w.id})">Delete</button>
-                        </td>
-                    </tr>
-                `).join('')}
-            </tbody>
-        </table>
-    `;
+    const names = new Map(exercises.map(e => [e.id, e.name]));
+
+    container.innerHTML = workouts.map(w => {
+        const d = parseDate(w.date);
+        const weekday = d.toLocaleDateString('en-GB', { weekday: 'long' });
+        const meta = [weekday, w.duration_min ? `${w.duration_min} min` : null].filter(Boolean).join(' · ');
+
+        const lines = w.sets.map(s => `
+            <li class="line">
+                <span>${escapeHtml(names.get(s.exercise_id) || `Exercise ${s.exercise_id}`)}</span>
+                <span class="leader"></span>
+                <span class="qty"><b>${s.set_count} × ${s.reps}</b>${s.weight_kg ? ` @ ${s.weight_kg} kg` : ''}</span>
+            </li>`).join('');
+
+        return `
+            <li class="entry">
+                <div class="entry-date">
+                    <span class="d">${d.getDate()}</span>
+                    <span class="m">${d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' }).toUpperCase()}</span>
+                </div>
+                <div>
+                    <div class="entry-title">${escapeHtml(w.notes || 'Session')}</div>
+                    <div class="entry-meta">${meta}</div>
+                    ${lines ? `<ul class="lines">${lines}</ul>` : '<div class="entry-meta">No exercises recorded.</div>'}
+                </div>
+                <button class="remove-btn" onclick="deleteWorkout(${w.id})">Remove</button>
+            </li>`;
+    }).join('');
 }
 
 function openWorkoutModal() {
@@ -79,41 +77,49 @@ function openWorkoutModal() {
     if (document.getElementById('setsContainer').children.length === 0) {
         addSetRow();
     }
+    document.getElementById('workoutDuration').focus();
 }
 
 function closeWorkoutModal() {
     document.getElementById('workoutModal').classList.remove('show');
+    document.getElementById('formAlert').classList.remove('show');
 }
 
 function addSetRow() {
     const container = document.getElementById('setsContainer');
-    const idx = container.children.length;
+    const n = container.children.length;
+
+    // Group the exercise list by muscle group for an easier pick
+    const groups = {};
+    for (const e of exercises) (groups[e.muscle_group] ||= []).push(e);
+    const options = Object.keys(groups).sort().map(g => `
+        <optgroup label="${escapeHtml(g)}">
+            ${groups[g].map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('')}
+        </optgroup>`).join('');
 
     const row = document.createElement('div');
-    row.className = 'form-row mt-sm';
-    row.style.gridTemplateColumns = '2fr 1fr 1fr 1fr auto';
-    row.style.alignItems = 'end';
+    row.className = 'set-row';
     row.innerHTML = `
-        <div class="form-group" style="margin-bottom: 0;">
-            <label>Exercise</label>
-            <select class="set-exercise" required>
-                <option value="">Select...</option>
-                ${exercises.map(e => `<option value="${e.id}">${escapeHtml(e.name)} (${escapeHtml(e.muscle_group)})</option>`).join('')}
+        <div class="form-group">
+            <label for="ex-${n}">Exercise</label>
+            <select id="ex-${n}" class="set-exercise" required>
+                <option value="">Choose…</option>
+                ${options}
             </select>
         </div>
-        <div class="form-group" style="margin-bottom: 0;">
-            <label>Sets</label>
-            <input type="number" class="set-count" value="3" min="1" required>
+        <div class="form-group">
+            <label for="sets-${n}">Sets</label>
+            <input id="sets-${n}" type="number" class="set-count" value="3" min="1" max="100" required>
         </div>
-        <div class="form-group" style="margin-bottom: 0;">
-            <label>Reps</label>
-            <input type="number" class="set-reps" value="10" min="1" required>
+        <div class="form-group">
+            <label for="reps-${n}">Reps</label>
+            <input id="reps-${n}" type="number" class="set-reps" value="10" min="1" max="1000" required>
         </div>
-        <div class="form-group" style="margin-bottom: 0;">
-            <label>Weight (kg)</label>
-            <input type="number" class="set-weight" step="0.5" placeholder="0">
+        <div class="form-group">
+            <label for="kg-${n}">kg</label>
+            <input id="kg-${n}" type="number" class="set-weight" step="0.5" min="0" placeholder="–">
         </div>
-        <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="margin-bottom: 2px;">✕</button>
+        <button type="button" class="remove-btn" onclick="this.parentElement.remove()" aria-label="Remove exercise">×</button>
     `;
     container.appendChild(row);
 }
@@ -121,7 +127,7 @@ function addSetRow() {
 async function handleCreateWorkout(e) {
     e.preventDefault();
 
-    const setRows = document.querySelectorAll('#setsContainer > div');
+    const setRows = document.querySelectorAll('#setsContainer > .set-row');
     const workoutSets = [];
 
     for (const row of setRows) {
@@ -149,18 +155,18 @@ async function handleCreateWorkout(e) {
         document.getElementById('setsContainer').innerHTML = '';
         document.getElementById('workoutForm').reset();
         document.getElementById('workoutDate').value = todayStr();
-        showAlert('alertArea', 'Workout logged successfully!', 'success');
+        showAlert('alertArea', 'Session saved.', 'success');
         loadData();
     } catch (err) {
-        showAlert('alertArea', err.message);
+        showAlert('formAlert', err.message);
     }
 }
 
 async function deleteWorkout(id) {
-    if (!confirm('Delete this workout?')) return;
+    if (!confirm('Remove this session from your log?')) return;
     try {
         await api.delete(`/workouts/${id}`);
-        showAlert('alertArea', 'Workout deleted.', 'success');
+        showAlert('alertArea', 'Session removed.', 'success');
         loadData();
     } catch (err) {
         showAlert('alertArea', err.message);

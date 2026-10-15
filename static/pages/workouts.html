@@ -1,65 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitTrack – Workouts</title>
+    <title>Workouts · FitTrack</title>
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 
 <body>
-    <div class="app-layout">
-        <nav class="sidebar">
-            <div class="brand">💪 FitTrack</div>
-            <ul class="nav-links">
-                <li><a href="/static/pages/dashboard.html"><span class="nav-icon">📊</span> Dashboard</a></li>
-                <li><a href="/static/pages/workouts.html" class="active"><span class="nav-icon">🏋️</span> Workouts</a>
-                </li>
-                <li><a href="/static/pages/calories.html"><span class="nav-icon">🍽️</span> Calories</a></li>
-                <li><a href="/static/pages/progress.html"><span class="nav-icon">📈</span> Progress</a></li>
-            </ul>
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">U</div>
-                    <span class="user-name" id="userName">User</span>
-                </div>
-                <button class="btn btn-secondary btn-sm btn-full" onclick="logout()">Sign Out</button>
+    <header class="masthead">
+        <div class="masthead-inner">
+            <a class="wordmark" href="/static/pages/dashboard.html">FitTrack <small>training log</small></a>
+            <nav class="tabs" aria-label="Main">
+                <a href="/static/pages/dashboard.html">Overview</a>
+                <a href="/static/pages/workouts.html" class="active" aria-current="page">Workouts</a>
+                <a href="/static/pages/calories.html">Meals</a>
+                <a href="/static/pages/progress.html">Body</a>
+            </nav>
+            <div class="who">
+                <span class="monogram" id="userAvatar" aria-hidden="true">U</span>
+                <span id="userName">User</span>
+                <button class="link-btn" onclick="logout()">Sign out</button>
             </div>
-        </nav>
+        </div>
+    </header>
 
-        <main class="main-content">
-            <div class="page-header">
-                <div>
-                    <h1>🏋️ Workouts</h1>
-                    <p>Log and track your workout sessions</p>
-                </div>
-                <button class="btn btn-primary" onclick="openWorkoutModal()">+ New Workout</button>
+    <main class="page">
+        <div class="page-head">
+            <div>
+                <p class="kicker" id="sessionCount">&nbsp;</p>
+                <h1>Training log</h1>
+                <p class="lede">Every session you've logged, newest first.</p>
             </div>
+            <button class="btn btn-primary" onclick="openWorkoutModal()">Log a workout</button>
+        </div>
 
-            <div id="alertArea" class="alert"></div>
+        <div id="alertArea" class="alert"></div>
 
-            <!-- Workout History -->
-            <div class="section">
-                <div class="section-header">
-                    <h2>Workout History</h2>
-                </div>
-                <div class="card">
-                    <div id="workoutList">
-                        <div class="empty-state">
-                            <div class="empty-icon">🏋️</div>
-                            <p>No workouts logged yet. Click "New Workout" to start!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
+        <div class="section-head">
+            <h2>Sessions</h2>
+        </div>
+        <ul class="entries" id="workoutList">
+            <li class="empty">Loading…</li>
+        </ul>
+    </main>
 
-    <!-- New Workout Modal -->
-    <div class="modal-overlay" id="workoutModal">
-        <div class="modal">
-            <h3>Log New Workout</h3>
+    <div class="modal-overlay" id="workoutModal" onclick="if (event.target === this) closeWorkoutModal()">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="workoutModalTitle">
+            <h3 id="workoutModalTitle">New session</h3>
+            <div id="formAlert" class="alert"></div>
             <form id="workoutForm">
                 <div class="form-row">
                     <div class="form-group">
@@ -68,25 +57,23 @@
                     </div>
                     <div class="form-group">
                         <label for="workoutDuration">Duration (min)</label>
-                        <input type="number" id="workoutDuration" placeholder="45" min="1">
+                        <input type="number" id="workoutDuration" placeholder="45" min="1" max="1440">
                     </div>
                 </div>
-
                 <div class="form-group">
-                    <label for="workoutNotes">Notes</label>
-                    <textarea id="workoutNotes" rows="2" placeholder="e.g. Chest day, felt strong"></textarea>
+                    <label for="workoutNotes">Name or notes</label>
+                    <textarea id="workoutNotes" rows="2" placeholder="Push day, felt strong on bench"></textarea>
                 </div>
 
-                <!-- Dynamic Sets -->
-                <div class="section-header mt-md">
-                    <h3 style="font-size: 1rem;">Exercises</h3>
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="addSetRow()">+ Add Set</button>
+                <div class="subhead">
+                    <h4>Exercises</h4>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addSetRow()">Add exercise</button>
                 </div>
                 <div id="setsContainer"></div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeWorkoutModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Workout</button>
+                    <button type="submit" class="btn btn-primary">Save session</button>
                 </div>
             </form>
         </div>
@@ -95,5 +82,4 @@
     <script src="/static/js/api.js"></script>
     <script src="/static/js/workouts.js"></script>
 </body>
-
 </html>
