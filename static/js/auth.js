@@ -71,14 +71,25 @@ async function handleRegister(e) {
         };
 
         await api.post('/register', data);
-        showAlert('authAlert', 'Account created. Taking you to sign in.', 'success');
-        setTimeout(() => {
-            window.location.href = '/static/pages/index.html';
-        }, 1500);
     } catch (err) {
         showAlert('authAlert', err.message);
-    } finally {
         btn.disabled = false;
         btn.textContent = label;
+        return;
+    }
+
+    // Sign the new user straight in rather than sending them back to the login page.
+    // The account exists at this point, so if this fails fall back to the sign-in page.
+    btn.innerHTML = '<span class="loader"></span> Signing in';
+    try {
+        const result = await api.post('/login', {
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value,
+        });
+        setToken(result.access_token);
+        setUsername(document.getElementById('username').value.trim());
+        window.location.href = '/static/pages/dashboard.html';
+    } catch {
+        window.location.href = '/static/pages/index.html';
     }
 }
