@@ -38,8 +38,7 @@ class PartialUpdate(BaseModel):
 class UserCreate(BaseModel):
     username: str = Field(min_length=3, max_length=50, pattern=r"^[A-Za-z0-9_.-]+$")
     email: EmailStr
-    # bcrypt only uses the first 72 bytes of a password
-    password: str = Field(min_length=8, max_length=72)
+    password: str = Field(min_length=8)
 
     @field_validator("email")
     @classmethod
@@ -47,6 +46,15 @@ class UserCreate(BaseModel):
         # users.email is VARCHAR(100); EmailStr alone allows up to 254
         if len(value) > 100:
             raise ValueError("Email must be at most 100 characters")
+        return value
+
+    @field_validator("password")
+    @classmethod
+    def _password_fits_bcrypt(cls, value: str) -> str:
+        # bcrypt silently ignores everything after the first 72 bytes, and
+        # accented letters or emoji take 2-4 bytes each
+        if len(value.encode("utf-8")) > 72:
+            raise ValueError("Password is too long (72 bytes at most; accented letters and emoji count extra)")
         return value
 
 

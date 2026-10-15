@@ -64,6 +64,11 @@ async function handleRegister(e) {
             throw new Error('Use at least 8 characters for the password.');
         }
 
+        // bcrypt only uses the first 72 bytes; non-ASCII characters take several
+        if (new TextEncoder().encode(password).length > 72) {
+            throw new Error('That password is too long. Accented letters and emoji count extra.');
+        }
+
         const data = {
             username: document.getElementById('username').value.trim(),
             email: document.getElementById('email').value.trim(),
