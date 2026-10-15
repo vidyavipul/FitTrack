@@ -14,7 +14,12 @@ from models import User
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "default_secret_key")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+if not SECRET_KEY or len(SECRET_KEY) < 32:
+    raise RuntimeError(
+        "JWT_SECRET_KEY must be set in .env (at least 32 characters). "
+        "Generate one with: python -c \"import secrets; print(secrets.token_hex(32))\""
+    )
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "30"))
 
