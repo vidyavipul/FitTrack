@@ -35,6 +35,12 @@ async function loadProgress() {
             document.getElementById('bodyFat').textContent =
                 summary.latest_body_fat ? summary.latest_body_fat.toFixed(1) : '--';
             document.getElementById('totalEntries').textContent = summary.entries;
+        } else {
+            // e.g. the last weigh-in was just removed
+            for (const id of ['currentWeight', 'weightChange', 'bodyFat']) {
+                document.getElementById(id).textContent = '--';
+            }
+            document.getElementById('totalEntries').textContent = 0;
         }
 
         const entries = logs || [];
@@ -50,6 +56,10 @@ async function loadProgress() {
 }
 
 function renderProgressChart(logs) {
+    if (weightChart) {
+        weightChart.destroy();
+        weightChart = null;
+    }
     if (!logs.length) return;
 
     const css = getComputedStyle(document.documentElement);
@@ -67,8 +77,6 @@ function renderProgressChart(logs) {
     const labels = logs.map(l => label(l.date));
     const weightData = logs.map(l => l.weight_kg ?? null);
     const bodyFatData = logs.map(l => l.body_fat_pct ?? null);
-
-    if (weightChart) weightChart.destroy();
 
     weightChart = new Chart(ctx, {
         type: 'line',
