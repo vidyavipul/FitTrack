@@ -1,6 +1,7 @@
 /* ─── Workouts Page Logic ────────────────────────────────────── */
 
 let exercises = [];
+let setRowSeq = 0;  // only ever increases, so row ids stay unique after removals
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!requireAuth()) return;
@@ -88,7 +89,7 @@ function closeWorkoutModal() {
 
 function addSetRow() {
     const container = document.getElementById('setsContainer');
-    const n = container.children.length;
+    const n = setRowSeq++;
 
     // Group the exercise list by muscle group for an easier pick
     const groups = {};
