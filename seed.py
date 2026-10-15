@@ -85,8 +85,14 @@ def seed_exercises(db) -> dict:
     return existing
 
 
+# Registration rejects .local addresses, so this email marks the seeded account
+DEMO_EMAIL = "demo@fittrack.local"
+
+
 def seed_demo_user(db, exercises: dict, password: str, reset: bool) -> None:
     user = db.query(User).filter(User.username == "demo").first()
+    if user and user.email != DEMO_EMAIL:
+        raise SystemExit("Someone registered the username 'demo' themselves; leaving that account alone.")
     if user and not reset:
         print("Demo user already exists (use --reset to recreate its data)")
         return
@@ -94,7 +100,7 @@ def seed_demo_user(db, exercises: dict, password: str, reset: bool) -> None:
         db.delete(user)
         db.commit()
 
-    user = User(username="demo", email="demo@fittrack.local", password_hash=hash_password(password))
+    user = User(username="demo", email=DEMO_EMAIL, password_hash=hash_password(password))
     db.add(user)
     db.flush()
 
