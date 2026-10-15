@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -33,11 +34,9 @@ def register(user_data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/login", response_model=Token)
-def login(login_data: LoginRequest, db: Session = Depends(get_db)):
-    """Authenticate user and return a JWT access token."""
-    user = db.query(User).filter(User.username == login_data.username).first()
-    if not user or not verify_password(login_data.password, user.password_hash):
+def _issue_token(username: str, password: str, db: Session) -> dict:
+    user = db.query(User).filter(User.username == username).first()
+    if not user or not verify_password(password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
@@ -46,3 +45,15 @@ def login(login_data: LoginRequest, db: Session = Depends(get_db)):
 
     access_token = create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/login", response_model=Token)
+def login(login_data: LoginRequest, db: Session = Depends(get_db)):
+    """Authenticate user and return a JWT access token."""
+    return _issue_token(login_data.username, login_data.password, db)
+
+
+@router.post("/token", response_model=Token, include_in_schema=False)
+def token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """Form-based login used by the Swagger UI "Authorize" button."""
+    return _issue_token(form_data.username, form_data.password, db)

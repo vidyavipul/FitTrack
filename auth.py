@@ -24,7 +24,7 @@ ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 EXPIRATION_MINUTES = int(os.getenv("JWT_EXPIRATION_MINUTES", "30"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
 def hash_password(password: str) -> str:
