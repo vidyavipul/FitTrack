@@ -29,9 +29,12 @@ class Exercise(Base):
     name = Column(String(100), nullable=False)
     category = Column(String(50), nullable=False)
     muscle_group = Column(String(50), nullable=False)
+    # NULL for built-in exercises, which nobody can change or delete
+    created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
-    workout_sets = relationship("WorkoutSet", back_populates="exercise", cascade="all, delete-orphan")
+    # The catalog is shared: removing an exercise must never remove users' logged sets
+    workout_sets = relationship("WorkoutSet", back_populates="exercise", passive_deletes="all")
 
 
 class Workout(Base):
@@ -53,7 +56,7 @@ class WorkoutSet(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     workout_id = Column(Integer, ForeignKey("workouts.id", ondelete="CASCADE"), nullable=False)
-    exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="CASCADE"), nullable=False)
+    exercise_id = Column(Integer, ForeignKey("exercises.id", ondelete="RESTRICT"), nullable=False)
     set_count = Column(Integer, nullable=False, default=1)
     reps = Column(Integer, nullable=False, default=1)
     weight_kg = Column(Numeric(6, 2))

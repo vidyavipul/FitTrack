@@ -143,6 +143,12 @@ mysql -u root -p -e "CREATE USER 'fittrack'@'localhost' IDENTIFIED BY 'choose_a_
                      GRANT ALL PRIVILEGES ON fittrack_db.* TO 'fittrack'@'localhost';"
 ```
 
+Upgrading a database created before exercise ownership was added? Apply the migration once:
+
+```bash
+mysql -u root -p < sql/migrations/001_exercise_owner.sql
+```
+
 ### 5. Configure environment variables
 
 ```bash

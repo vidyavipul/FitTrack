@@ -19,7 +19,9 @@ CREATE TABLE IF NOT EXISTS exercises (
     name VARCHAR(100) NOT NULL,
     category VARCHAR(50) NOT NULL,
     muscle_group VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_by INT NULL,  -- NULL for built-in exercises
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Workout sessions
@@ -43,7 +45,7 @@ CREATE TABLE IF NOT EXISTS workout_sets (
     weight_kg DECIMAL(6, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (workout_id) REFERENCES workouts(id) ON DELETE CASCADE,
-    FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+    FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE RESTRICT
 );
 
 -- Calorie / meal tracking
