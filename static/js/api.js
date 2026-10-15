@@ -66,8 +66,9 @@ async function apiFetch(endpoint, options = {}) {
         headers,
     });
 
-    // Handle 401 — token expired or invalid
-    if (response.status === 401) {
+    // Handle 401 — token expired or invalid. Without a token (e.g. a failed
+    // login) there is no session to end, so fall through and show the error.
+    if (response.status === 401 && token) {
         logout();
         return null;
     }
@@ -80,10 +81,23 @@ async function apiFetch(endpoint, options = {}) {
     // Handle errors
     if (!response.ok) {
         const error = await response.json().catch(() => ({ detail: 'Something went wrong' }));
-        throw new Error(error.detail || `HTTP ${response.status}`);
+        throw new Error(formatErrorDetail(error.detail) || `HTTP ${response.status}`);
     }
 
     return response.json();
+}
+
+/**
+ * Turn a FastAPI error detail (a string, or a list of validation errors)
+ * into a readable message.
+ */
+function formatErrorDetail(detail) {
+    if (!Array.isArray(detail)) return detail;
+    return detail.map(d => {
+        const field = (d.loc || []).filter(p => p !== 'body').join('.');
+        const msg = (d.msg || '').replace(/^Value error, /, '');
+        return field ? `${field}: ${msg}` : msg;
+    }).join('; ');
 }
 
 /**
