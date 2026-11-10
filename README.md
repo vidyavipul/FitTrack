@@ -115,7 +115,7 @@ FitTrack/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/FitTrack.git
+git clone https://github.com/vidyavipul/FitTrack.git
 cd FitTrack
 ```
 
